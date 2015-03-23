@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+# bin/compile <build-dir> <cache-dir>
+
+shopt -s dotglob
+set -e
+
+# ------------------------------------------------------------------------------------------------
+#        compile_build_dir: /tmp/staged/app
+#        compile_cache_dir: /tmp/cache
+#        compile_buildpack_bin: /tmp/buildpacks/{project-name}/bin
+#        compile_buildpack_dir: /tmp/buildpacks/{project-name}
+#        pwd: /tmp/staged
+#------------------------------------------------------------------------------------------------------
+compile_build_dir=$1
+compile_cache_dir=$2
+compile_buildpack_dir=$(cd $(dirname $0) && cd .. && pwd)
+compile_buildpack_bin=$compile_buildpack_dir/bin
+
+echo "pwd: $(pwd)"
+echo "compile_build_dir: $compile_build_dir"
+echo "compile_cache_dir: $compile_cache_dir"
+echo "compile_buildpack_bin: $compile_buildpack_bin"
+echo "compile_buildpack_dir: $compile_buildpack_dir"
+
+cd $compile_build_dir
+
+# -----------------------------------creating public directory under cache directory-------------------------------------------------------------
+mkdir -p $compile_cache_dir/public
+mv * $compile_cache_dir/public
+mv $compile_cache_dir/public .
+[[ -f public/Procfile ]] && mv public/Procfile .
+
+#jdk8
+if [ -d jdk1.8.0_25 ]; then
+  echo "-----> jdk1.8.0_25 folder found, moving along."
+
+else
+  echo -n "-----> jdk1.8.0_25 folder not found! "
+  if [[ -d "$compile_cache_dir/jdk1.8.0_25" ]]; then
+    echo -n "Copying jdk from cache to app... "
+    cp -r "$compile_cache_dir/jdk1.8.0_25" "$compile_build_dir"
+    echo "Done!"
+
+  else
+    echo -n "-----> Extracting (jdk1.8.0_25)....."
+    curl --max-time 180 --location "https://s3.amazonaws.com/covisintrnd.com-software/jdk-8u25-linux-x64.gz" | tar xz
+    cd "$compile_build_dir"
+    chmod -R uog+rx $compile_build_dir/jdk1.8.0_25
+    echo "Done!"
+    
+  fi
+fi
+#jdk8 - end 
+
+# Tomee plus - tomeeplus
+
+if [ -d apache-tomee-plus-1.7.1 ]; then
+  echo "-----> Apache Tomee folder found, moving along."
+else
+  echo -n "-----> Apache Tomee foldernot found! "
+  if [[ -d "$compile_cache_dir/apache-tomee-plus-1.7.1" ]]; then
+    echo -n "Copying apache-tomee-plus-1.7.1 from cache to app... "
+    cp -r "$compile_cache_dir/apache-tomee-plus-1.7.1" "$compile_build_dir"
+    echo "Done!"
+	else
+    echo -n "-----> Installing (Apache Tomee Server)....."
+    wget http://apache.openmirror.de/tomee/tomee-1.7.1/apache-tomee-1.7.1-plus.tar.gz && tar xvzf  apache-tomee-1.7.1-plus.tar.gz && rm -rf apache-tomee-1.7.1-plus.tar.gz
+        
+    cd $compile_build_dir/apache-tomee-plus-1.7.1
+        
+    tomee_build_dir=$compile_build_dir/tomeebuild
+    
+    #compile the source
+    make
+    echo "TomEE has been compiled successfully..."
+
+    #install
+    make install
+    echo "TomEE has been installed successfully..."
+    chmod -R uog+rx $compile_build_dir/tomeebuild
+    echo "Done!"
+  
+  fi
+fi
+
+#apache - Tomee - end
+
+export JAVA_HOME="$compile_build_dir/jdk1.8.0_25"
+export PATH="$JAVA_HOME/bin:$PATH"
+
+
+
+cd $compile_build_dir
+# -------------------------------copying build pack Tomee end-----------------------------------------------------------------
+cp $compile_buildpack_bin/boot.sh .
+# -------------------------------copying webagent conf -----------------------------------------------------------------
+#logging properties which having without ConsoleHandler
+cp -f $compile_buildpack_dir/conf/logging.properties $compile_build_dir/apache-tomee-plus-1.7.1/conf/logging.properties
+#copying server.xml from buildpack to tomcat conf directory 
+cp -f $compile_buildpack_dir/conf/server.xml  $compile_build_dir/apache-tomee-plus-1.7.1/conf/server.xml
+
+cd $compile_build_dir
+
+rm -rf "$compile_cache_dir/jdk1.8.0_25"
+cp -r jdk1.8.0_25 "$compile_cache_dir/jdk1.8.0_25"
+
+
+rm -rf "$compile_cache_dir/apache-tomee-plus-1.7.1"
+cp -r apache-tomee-plus-1.7.1 "$compile_cache_dir/apache-tomee-plus-1.7.1"
+
+# Deploy all war files
+WEBAPPDIR=$compile_build_dir/apache-tomee-plus-1.7.1/webapps
+cd $compile_build_dir/public
+for WAR in *.war; do
+[ -r "$WAR" ] || continue
+echo "Deploying $WAR"
+mv "$WAR" "$WEBAPPDIR"
+done
