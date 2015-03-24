@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # bin/compile <build-dir> <cache-dir>
-$stdout.sync = true
+echo "Compile started"
 
 shopt -s dotglob
 set -e
