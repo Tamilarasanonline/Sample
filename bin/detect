@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 echo "Detect started"
-$stdout.sync = true
-echo "stdout sync true"
 if [[ ! (-n $(find . -type f \( -iname "*.war" \))) ]]
 then
     echo "No" && exit 1
