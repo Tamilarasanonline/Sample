@@ -1,0 +1,635 @@
+# Zookeeper 1 Service
+
+---
+ 
+apiVersion: v1
+kind: Service
+metadata:
+  name: zk1-service
+  labels:
+    app: zookeeper1
+spec:
+  ports:
+    - port: 12181
+  selector:
+    app: zookeeper1
+  clusterIP: None
+
+# Zookeeper 2 Service
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zk2-service
+  labels:
+    app: zookeeper2
+spec:
+  ports:
+    - port: 22181
+  selector:
+    app: zookeeper2
+  clusterIP: None
+  
+
+# Zookeeper 3 Service
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zk3-service
+  labels:
+    app: zookeeper3
+spec:
+  ports:
+    - port: 32181
+  selector:
+    app: zookeeper3
+  clusterIP: None
+
+
+# Kafka 1 Service
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka1-service
+  labels:
+    app: kafka1
+spec:
+  ports:
+  - port: 19092
+    name: broker
+  - port: 18093
+    name: schemaregistry
+  selector:
+    app: kafka1
+  clusterIP: None
+
+  
+# Kafka 2 Service
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka2-service
+  labels:
+    app: kafka2
+spec:
+  ports:
+  - port: 29092
+    name: broker
+  - port: 28093
+    name: schemaregistry
+  selector:
+    app: kafka2
+  clusterIP: None
+ 
+# Kafka 3 Service
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka3-service
+  labels:
+    app: kafka3
+spec:
+  ports:
+  - port: 39092
+    name: broker
+  - port: 38093
+    name: schemaregistry
+  selector:
+    app: kafka3
+  clusterIP: None
+
+# Kafka Manager Service
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafkamanager-service
+  labels:
+    app: kafkamanager
+spec:
+  type: NodePort
+  ports:
+    - port: 9000
+      nodePort: 30180
+      name: http
+  selector:
+    name: kafkamanager-service
+  
+# Zookeeper 1 Persistance Volume Claim
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zk1datapvclaim
+  labels:
+    app: zookeeper1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+     
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zk1logpvclaim
+  labels:
+    app: zookeeper1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+# Zookeeper 2 Persistance Volume Claim
+ 
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zk2datapvclaim
+  labels:
+    app: zookeeper2
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+     
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zk2logpvclaim
+  labels:
+    app: zookeeper2
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+# Zookeeper 3 Persistance Volume Claim
+     
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zk3datapvclaim
+  labels:
+    app: zookeeper3
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+     
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zk3logpvclaim
+  labels:
+    app: zookeeper3
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+     
+---
+# Kafka1 Persistance Volume Claim
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kafka1datapvclaim
+  labels:
+    app: kafka1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+      
+# Kafka2 Persistance Volume Claim
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kafka2datapvclaim
+  labels:
+    app: kafka2
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+# Kafka3 Persistance Volume Claim
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kafka3datapvclaim
+  labels:
+    app: kafka3
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+      
+# Kafka Zookeeper Persistance Volume 
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: zookeeperpvvolume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 60Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data"
+
+  
+# ZooKeeper1 Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zk1-deployment
+  labels:
+    app: zookeeper1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper1
+  template:
+    metadata:
+      labels:
+        app: zookeeper1
+    spec:
+      containers:
+      - name: zookeeper1
+        image: confluentinc/cp-zookeeper:latest
+        env:
+        - name: ZOOKEEPER_SERVER_ID
+          value: "1"
+        - name: ZOOKEEPER_CLIENT_PORT
+          value: "12181"
+        - name: ZOOKEEPER_TICK_TIME
+          value: "2000"
+        - name: ZOOKEEPER_INIT_LIMIT
+          value: "5"
+        - name: ZOOKEEPER_SYNC_LIMIT
+          value: "2"
+        - name: ZOOKEEPER_SERVERS
+          value: "zk1-service:12888:13888;zk2-service:22888:23888;zk3-service:32888:33888"
+        ports:
+        - containerPort: 12181
+        volumeMounts:
+        - name: zk1datapersistentstorage
+          mountPath: /var/lib/zookeeper/data
+        - name: zk1logpersistentstorage
+          mountPath: /var/lib/zookeeper/log
+      volumes:
+      - name: zk1datapersistentstorage
+        persistentVolumeClaim:
+          claimName: zk1datapvclaim
+      - name: zk1logpersistentstorage
+        persistentVolumeClaim:
+          claimName: zk1logpvclaim
+
+# ZooKeeper 2 Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zk2-deployment
+  labels:
+    app: zookeeper2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper2
+  template:
+    metadata:
+      labels:
+        app: zookeeper2
+    spec:
+      containers:
+      - name: zookeeper2
+        image: confluentinc/cp-zookeeper:latest
+        env:
+        - name: ZOOKEEPER_SERVER_ID
+          value: "2"
+        - name: ZOOKEEPER_CLIENT_PORT
+          value: "22181"
+        - name: ZOOKEEPER_TICK_TIME
+          value: "2000"
+        - name: ZOOKEEPER_INIT_LIMIT
+          value: "5"
+        - name: ZOOKEEPER_SYNC_LIMIT
+          value: "2"
+        - name: ZOOKEEPER_SERVERS
+          value: "zk1-service:12888:13888;zk2-service:22888:23888;zk3-service:32888:33888"
+        ports:
+        - containerPort: 22181
+        volumeMounts:
+        - name: zk2datapersistentstorage
+          mountPath: /var/lib/zookeeper/data
+        - name: zk2logpersistentstorage
+          mountPath: /var/lib/zookeeper/log
+      volumes:
+      - name: zk2datapersistentstorage
+        persistentVolumeClaim:
+          claimName: zk2datapvclaim
+      - name: zk2logpersistentstorage
+        persistentVolumeClaim:
+          claimName: zk2logpvclaim
+
+# ZooKeeper 3 Deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zk3-deployment
+  labels:
+    app: zookeeper3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper3
+  template:
+    metadata:
+      labels:
+        app: zookeeper3
+    spec:
+      containers:
+      - name: zookeeper3
+        image: confluentinc/cp-zookeeper:latest
+        env:
+        - name: ZOOKEEPER_SERVER_ID
+          value: "3"
+        - name: ZOOKEEPER_CLIENT_PORT
+          value: "32181"
+        - name: ZOOKEEPER_TICK_TIME
+          value: "2000"
+        - name: ZOOKEEPER_INIT_LIMIT
+          value: "5"
+        - name: ZOOKEEPER_SYNC_LIMIT
+          value: "2"
+        - name: ZOOKEEPER_SERVERS
+          value: "zk1-service:12888:13888;zk2-service:22888:23888;zk3-service:32888:33888"
+        ports:
+        - containerPort: 32181
+        volumeMounts:
+        - name: zk3datapersistentstorage
+          mountPath: /var/lib/zookeeper/data
+        - name: zk3logpersistentstorage
+          mountPath: /var/lib/zookeeper/log
+      volumes:
+      - name: zk3datapersistentstorage
+        persistentVolumeClaim:
+          claimName: zk3datapvclaim
+      - name: zk3logpersistentstorage
+        persistentVolumeClaim:
+          claimName: zk3logpvclaim
+
+          
+# Kafka-1 Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka1-deployment
+  labels:
+    app: kafka1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka1
+  template:
+    metadata:
+      labels:
+        app: kafka1
+    spec:
+      containers:
+      - name: kafka1
+        image: confluentinc/cp-kafka:latest
+        env:
+        - name: KAFKA_BROKER_ID
+          value: "1"
+        - name: KAFKA_ZOOKEEPER_CONNECT
+          value: "zk1-service:12181,zk2-service:22181,zk3-service:32181"
+        - name: KAFKA_ADVERTISED_LISTENERS
+          value: "PLAINTEXT://kafka1-service:19092"
+        - name: KAFKA_DELETE_TOPIC_ENABLE
+          value: "true"
+        - name: KAFKA_LOG_RETENTION_HOURS
+          value: "1"
+        - name: KAFKA_MESSAGE_MAX_BYTES
+          value: "10000000"
+        - name: KAFKA_REPLICA_FETCH_MAX_BYTES
+          value: "10000000"
+        - name: KAFKA_GROUP_MAX_SESSION_TIMEOUT_MS
+          value: "60000"
+        - name: KAFKA_NUM_PARTITIONS
+          value: "2"
+        - name: KAFKA_DELETE_RETENTION_MS
+          value: "1000"
+        - name: JMX_PORT
+          value: "18093"
+        - name: KAFKA_LOG4J_LOGGERS
+          value: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+        ports:
+        - containerPort: 19092
+        - containerPort: 18093
+        volumeMounts:
+        - name: kafka1datapersistentstorage
+          mountPath: /var/lib/kafka/data
+      volumes:
+      - name: kafka1datapersistentstorage
+        persistentVolumeClaim:
+          claimName: kafka1datapvclaim
+
+# Kafka-2 Deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka2-deployment
+  labels:
+    app: kafka2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka2
+  template:
+    metadata:
+      labels:
+        app: kafka2
+    spec:
+      containers:
+      - name: kafka2
+        image: confluentinc/cp-kafka:latest
+        env:
+        - name: KAFKA_BROKER_ID
+          value: "2"
+        - name: KAFKA_ZOOKEEPER_CONNECT
+          value: "zk1-service:12181,zk2-service:22181,zk3-service:32181"
+        - name: KAFKA_ADVERTISED_LISTENERS
+          value: "PLAINTEXT://kafka2-service:29092"
+        - name: KAFKA_DELETE_TOPIC_ENABLE
+          value: "true"
+        - name: KAFKA_LOG_RETENTION_HOURS
+          value: "1"
+        - name: KAFKA_MESSAGE_MAX_BYTES
+          value: "10000000"
+        - name: KAFKA_REPLICA_FETCH_MAX_BYTES
+          value: "10000000"
+        - name: KAFKA_GROUP_MAX_SESSION_TIMEOUT_MS
+          value: "60000"
+        - name: KAFKA_NUM_PARTITIONS
+          value: "2"
+        - name: KAFKA_DELETE_RETENTION_MS
+          value: "1000"
+        - name: JMX_PORT
+          value: "28093"
+        - name: KAFKA_LOG4J_LOGGERS
+          value: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+        ports:
+        - containerPort: 29092
+        - containerPort: 28093
+        volumeMounts:
+        - name: kafka2datapersistentstorage
+          mountPath: /var/lib/kafka/data
+      volumes:
+      - name: kafka2datapersistentstorage
+        persistentVolumeClaim:
+          claimName: kafka2datapvclaim
+
+# Kafka-3 Deployment
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka3-deployment
+  labels:
+    app: kafka3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka3
+  template:
+    metadata:
+      labels:
+        app: kafka3
+    spec:
+      containers:
+      - name: kafka3
+        image: confluentinc/cp-kafka:latest
+        env:
+        - name: KAFKA_BROKER_ID
+          value: "3"
+        - name: KAFKA_ZOOKEEPER_CONNECT
+          value: "zk1-service:12181,zk2-service:22181,zk3-service:32181"
+        - name: KAFKA_ADVERTISED_LISTENERS
+          value: "PLAINTEXT://kafka3-service:39092"
+        - name: KAFKA_DELETE_TOPIC_ENABLE
+          value: "true"
+        - name: KAFKA_LOG_RETENTION_HOURS
+          value: "1"
+        - name: KAFKA_MESSAGE_MAX_BYTES
+          value: "10000000"
+        - name: KAFKA_REPLICA_FETCH_MAX_BYTES
+          value: "10000000"
+        - name: KAFKA_GROUP_MAX_SESSION_TIMEOUT_MS
+          value: "60000"
+        - name: KAFKA_NUM_PARTITIONS
+          value: "2"
+        - name: KAFKA_DELETE_RETENTION_MS
+          value: "1000"
+        - name: JMX_PORT
+          value: "38093"
+        - name: KAFKA_LOG4J_LOGGERS
+          value: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+        ports:
+        - containerPort: 39092
+        - containerPort: 38093
+        volumeMounts:
+        - name: kafka3datapersistentstorage
+          mountPath: /var/lib/kafka/data
+      volumes:
+      - name: kafka3datapersistentstorage
+        persistentVolumeClaim:
+          claimName: kafka3datapvclaim
+
+# Kafka manager Deployment
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafkamanager-deployment
+  labels:
+    app: kafkamanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafkamanager
+  template:
+    metadata:
+      labels:
+        app: kafkamanager
+    spec:
+      containers:
+      - name: kafkamanager
+        image: sheepkiller/kafka-manager:latest
+        env:
+        - name: ZK_HOSTS
+          value: "zk1-service:12181,zk2-service:22181,zk3-service:32181"
+        ports:
+        - containerPort: 9000
+
