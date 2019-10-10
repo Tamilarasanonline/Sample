@@ -1,0 +1,1452 @@
+Flag --export has been deprecated, This flag is deprecated and will be removed in future.
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2019-10-08T01:34:37Z"
+    generateName: esb-kafka-
+    labels:
+      app.kubernetes.io/component: kafka-broker
+      app.kubernetes.io/instance: esb
+      app.kubernetes.io/managed-by: Tiller
+      app.kubernetes.io/name: kafka
+      controller-revision-hash: esb-kafka-65bb6db5bc
+      helm.sh/chart: kafka-0.20.0
+      statefulset.kubernetes.io/pod-name: esb-kafka-0
+    name: esb-kafka-0
+    namespace: esb-nprd
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: StatefulSet
+      name: esb-kafka
+      uid: 2cb30b70-7748-46a6-a7b1-670501c2d3ef
+    resourceVersion: "14458"
+    selfLink: /api/v1/namespaces/esb-nprd/pods/esb-kafka-0
+    uid: 25fa844c-2a32-4ff8-b87e-228aab4d678d
+  spec:
+    containers:
+    - command:
+      - sh
+      - -exc
+      - |
+        unset KAFKA_PORT && \
+        export KAFKA_BROKER_ID=${POD_NAME##*-} && \
+        export KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${POD_IP}:9092 && \
+        exec /etc/confluent/docker/run
+      env:
+      - name: POD_IP
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: status.podIP
+      - name: POD_NAME
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: metadata.name
+      - name: POD_NAMESPACE
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: metadata.namespace
+      - name: KAFKA_HEAP_OPTS
+        value: -Xmx1G -Xms1G
+      - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+        value: "3"
+      - name: KAFKA_ZOOKEEPER_CONNECT
+        value: esb-zookeeper:2181
+      - name: KAFKA_LOG_DIRS
+        value: /opt/kafka/data/logs
+      - name: KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE
+        value: "false"
+      - name: KAFKA_JMX_PORT
+        value: "5555"
+      image: confluentinc/cp-kafka:5.0.1
+      imagePullPolicy: IfNotPresent
+      livenessProbe:
+        exec:
+          command:
+          - sh
+          - -ec
+          - /usr/bin/jps | /bin/grep -q SupportedKafka
+        failureThreshold: 3
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 5
+      name: kafka-broker
+      ports:
+      - containerPort: 9092
+        name: kafka
+        protocol: TCP
+      readinessProbe:
+        failureThreshold: 3
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        successThreshold: 1
+        tcpSocket:
+          port: kafka
+        timeoutSeconds: 5
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /opt/kafka/data
+        name: datadir
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-vczkz
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    hostname: esb-kafka-0
+    nodeName: minikube
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    subdomain: esb-kafka-headless
+    terminationGracePeriodSeconds: 60
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: datadir
+      persistentVolumeClaim:
+        claimName: datadir-esb-kafka-0
+    - name: default-token-vczkz
+      secret:
+        defaultMode: 420
+        secretName: default-token-vczkz
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T01:34:38Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T09:06:34Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T09:06:34Z"
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T01:34:38Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: docker://3bb91c45cf5601413d7bb987cb41ed63afe1db85c8fb3f8ccc9ef783b1330916
+      image: confluentinc/cp-kafka:5.0.1
+      imageID: docker-pullable://confluentinc/cp-kafka@sha256:c87b1c07fb53b1a82d24b436e53485917876a963dc67311800109fa12fe9a63d
+      lastState:
+        terminated:
+          containerID: docker://1e77245ec50f2d2ca7141c567b7cc6bb2f502d39ed7ca278c3451c74e6a64fc4
+          exitCode: 1
+          finishedAt: "2019-10-08T09:05:49Z"
+          reason: Error
+          startedAt: "2019-10-08T09:04:49Z"
+      name: kafka-broker
+      ready: true
+      restartCount: 15
+      state:
+        running:
+          startedAt: "2019-10-08T09:05:50Z"
+    hostIP: 10.0.2.15
+    phase: Running
+    podIP: 172.17.0.2
+    qosClass: BestEffort
+    startTime: "2019-10-08T01:34:38Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2019-10-08T04:01:59Z"
+    generateName: esb-kafka-
+    labels:
+      app.kubernetes.io/component: kafka-broker
+      app.kubernetes.io/instance: esb
+      app.kubernetes.io/managed-by: Tiller
+      app.kubernetes.io/name: kafka
+      controller-revision-hash: esb-kafka-65bb6db5bc
+      helm.sh/chart: kafka-0.20.0
+      statefulset.kubernetes.io/pod-name: esb-kafka-1
+    name: esb-kafka-1
+    namespace: esb-nprd
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: StatefulSet
+      name: esb-kafka
+      uid: 2cb30b70-7748-46a6-a7b1-670501c2d3ef
+    resourceVersion: "14449"
+    selfLink: /api/v1/namespaces/esb-nprd/pods/esb-kafka-1
+    uid: 92cf4edf-e449-4923-8eff-84477562ba91
+  spec:
+    containers:
+    - command:
+      - sh
+      - -exc
+      - |
+        unset KAFKA_PORT && \
+        export KAFKA_BROKER_ID=${POD_NAME##*-} && \
+        export KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${POD_IP}:9092 && \
+        exec /etc/confluent/docker/run
+      env:
+      - name: POD_IP
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: status.podIP
+      - name: POD_NAME
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: metadata.name
+      - name: POD_NAMESPACE
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: metadata.namespace
+      - name: KAFKA_HEAP_OPTS
+        value: -Xmx1G -Xms1G
+      - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+        value: "3"
+      - name: KAFKA_ZOOKEEPER_CONNECT
+        value: esb-zookeeper:2181
+      - name: KAFKA_LOG_DIRS
+        value: /opt/kafka/data/logs
+      - name: KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE
+        value: "false"
+      - name: KAFKA_JMX_PORT
+        value: "5555"
+      image: confluentinc/cp-kafka:5.0.1
+      imagePullPolicy: IfNotPresent
+      livenessProbe:
+        exec:
+          command:
+          - sh
+          - -ec
+          - /usr/bin/jps | /bin/grep -q SupportedKafka
+        failureThreshold: 3
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 5
+      name: kafka-broker
+      ports:
+      - containerPort: 9092
+        name: kafka
+        protocol: TCP
+      readinessProbe:
+        failureThreshold: 3
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        successThreshold: 1
+        tcpSocket:
+          port: kafka
+        timeoutSeconds: 5
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /opt/kafka/data
+        name: datadir
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-vczkz
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    hostname: esb-kafka-1
+    nodeName: minikube
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    subdomain: esb-kafka-headless
+    terminationGracePeriodSeconds: 60
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: datadir
+      persistentVolumeClaim:
+        claimName: datadir-esb-kafka-1
+    - name: default-token-vczkz
+      secret:
+        defaultMode: 420
+        secretName: default-token-vczkz
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T04:02:01Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T09:06:30Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T09:06:30Z"
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T04:02:00Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: docker://827536a4eb61c859cc7e0f34b5f101cd3040a618e46dd5ad1f6567950c493e64
+      image: confluentinc/cp-kafka:5.0.1
+      imageID: docker-pullable://confluentinc/cp-kafka@sha256:c87b1c07fb53b1a82d24b436e53485917876a963dc67311800109fa12fe9a63d
+      lastState:
+        terminated:
+          containerID: docker://d6266f00c1f85cb19e90608fb5d591441cd8992315ce492242f8c14873c41282
+          exitCode: 1
+          finishedAt: "2019-10-08T09:05:49Z"
+          reason: Error
+          startedAt: "2019-10-08T09:04:52Z"
+      name: kafka-broker
+      ready: true
+      restartCount: 2
+      state:
+        running:
+          startedAt: "2019-10-08T09:05:50Z"
+    hostIP: 10.0.2.15
+    phase: Running
+    podIP: 172.17.0.9
+    qosClass: BestEffort
+    startTime: "2019-10-08T04:02:01Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2019-10-08T04:02:35Z"
+    generateName: esb-kafka-
+    labels:
+      app.kubernetes.io/component: kafka-broker
+      app.kubernetes.io/instance: esb
+      app.kubernetes.io/managed-by: Tiller
+      app.kubernetes.io/name: kafka
+      controller-revision-hash: esb-kafka-65bb6db5bc
+      helm.sh/chart: kafka-0.20.0
+      statefulset.kubernetes.io/pod-name: esb-kafka-2
+    name: esb-kafka-2
+    namespace: esb-nprd
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: StatefulSet
+      name: esb-kafka
+      uid: 2cb30b70-7748-46a6-a7b1-670501c2d3ef
+    resourceVersion: "14439"
+    selfLink: /api/v1/namespaces/esb-nprd/pods/esb-kafka-2
+    uid: 006e9daf-87db-482f-9ee4-7a75eadd6d35
+  spec:
+    containers:
+    - command:
+      - sh
+      - -exc
+      - |
+        unset KAFKA_PORT && \
+        export KAFKA_BROKER_ID=${POD_NAME##*-} && \
+        export KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${POD_IP}:9092 && \
+        exec /etc/confluent/docker/run
+      env:
+      - name: POD_IP
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: status.podIP
+      - name: POD_NAME
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: metadata.name
+      - name: POD_NAMESPACE
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: metadata.namespace
+      - name: KAFKA_HEAP_OPTS
+        value: -Xmx1G -Xms1G
+      - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+        value: "3"
+      - name: KAFKA_ZOOKEEPER_CONNECT
+        value: esb-zookeeper:2181
+      - name: KAFKA_LOG_DIRS
+        value: /opt/kafka/data/logs
+      - name: KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE
+        value: "false"
+      - name: KAFKA_JMX_PORT
+        value: "5555"
+      image: confluentinc/cp-kafka:5.0.1
+      imagePullPolicy: IfNotPresent
+      livenessProbe:
+        exec:
+          command:
+          - sh
+          - -ec
+          - /usr/bin/jps | /bin/grep -q SupportedKafka
+        failureThreshold: 3
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 5
+      name: kafka-broker
+      ports:
+      - containerPort: 9092
+        name: kafka
+        protocol: TCP
+      readinessProbe:
+        failureThreshold: 3
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        successThreshold: 1
+        tcpSocket:
+          port: kafka
+        timeoutSeconds: 5
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /opt/kafka/data
+        name: datadir
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-vczkz
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    hostname: esb-kafka-2
+    nodeName: minikube
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    subdomain: esb-kafka-headless
+    terminationGracePeriodSeconds: 60
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: datadir
+      persistentVolumeClaim:
+        claimName: datadir-esb-kafka-2
+    - name: default-token-vczkz
+      secret:
+        defaultMode: 420
+        secretName: default-token-vczkz
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T04:02:39Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T09:06:25Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T09:06:25Z"
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T04:02:39Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: docker://7686f26844edb74547257952b7120a872630a6a5c96c7acd86615744d97b454c
+      image: confluentinc/cp-kafka:5.0.1
+      imageID: docker-pullable://confluentinc/cp-kafka@sha256:c87b1c07fb53b1a82d24b436e53485917876a963dc67311800109fa12fe9a63d
+      lastState:
+        terminated:
+          containerID: docker://32277acdc41e6494d259b419f37e6c14bf909e2268217b4d4a0d86de46b386b9
+          exitCode: 1
+          finishedAt: "2019-10-08T09:05:49Z"
+          reason: Error
+          startedAt: "2019-10-08T09:04:55Z"
+      name: kafka-broker
+      ready: true
+      restartCount: 2
+      state:
+        running:
+          startedAt: "2019-10-08T09:05:50Z"
+    hostIP: 10.0.2.15
+    phase: Running
+    podIP: 172.17.0.10
+    qosClass: BestEffort
+    startTime: "2019-10-08T04:02:39Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2019-10-08T01:34:37Z"
+    generateName: esb-zookeeper-
+    labels:
+      app: zookeeper
+      component: server
+      controller-revision-hash: esb-zookeeper-cd68659c4
+      release: esb
+      statefulset.kubernetes.io/pod-name: esb-zookeeper-0
+    name: esb-zookeeper-0
+    namespace: esb-nprd
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: StatefulSet
+      name: esb-zookeeper
+      uid: c9a31d2b-a660-4ced-b88c-d09d0fec0aef
+    resourceVersion: "14348"
+    selfLink: /api/v1/namespaces/esb-nprd/pods/esb-zookeeper-0
+    uid: a58b7bb6-52d0-43fd-b6da-652384cf2222
+  spec:
+    containers:
+    - command:
+      - /bin/bash
+      - -xec
+      - /config-scripts/run
+      env:
+      - name: ZK_REPLICAS
+        value: "3"
+      - name: JMXAUTH
+        value: "false"
+      - name: JMXDISABLE
+        value: "false"
+      - name: JMXPORT
+        value: "1099"
+      - name: JMXSSL
+        value: "false"
+      - name: ZK_HEAP_SIZE
+        value: 1G
+      - name: ZK_SYNC_LIMIT
+        value: "10"
+      - name: ZK_TICK_TIME
+        value: "2000"
+      - name: ZOO_AUTOPURGE_PURGEINTERVAL
+        value: "0"
+      - name: ZOO_AUTOPURGE_SNAPRETAINCOUNT
+        value: "3"
+      - name: ZOO_INIT_LIMIT
+        value: "5"
+      - name: ZOO_MAX_CLIENT_CNXNS
+        value: "60"
+      - name: ZOO_PORT
+        value: "2181"
+      - name: ZOO_STANDALONE_ENABLED
+        value: "false"
+      - name: ZOO_TICK_TIME
+        value: "2000"
+      image: zookeeper:3.5.5
+      imagePullPolicy: IfNotPresent
+      livenessProbe:
+        exec:
+          command:
+          - sh
+          - /config-scripts/ok
+        failureThreshold: 2
+        initialDelaySeconds: 20
+        periodSeconds: 30
+        successThreshold: 1
+        timeoutSeconds: 5
+      name: zookeeper
+      ports:
+      - containerPort: 2181
+        name: client
+        protocol: TCP
+      - containerPort: 3888
+        name: election
+        protocol: TCP
+      - containerPort: 2888
+        name: server
+        protocol: TCP
+      readinessProbe:
+        exec:
+          command:
+          - sh
+          - /config-scripts/ready
+        failureThreshold: 2
+        initialDelaySeconds: 20
+        periodSeconds: 30
+        successThreshold: 1
+        timeoutSeconds: 5
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /data
+        name: data
+      - mountPath: /config-scripts
+        name: config
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-vczkz
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    hostname: esb-zookeeper-0
+    nodeName: minikube
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+    serviceAccount: default
+    serviceAccountName: default
+    subdomain: esb-zookeeper-headless
+    terminationGracePeriodSeconds: 1800
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: data-esb-zookeeper-0
+    - configMap:
+        defaultMode: 365
+        name: esb-zookeeper
+      name: config
+    - name: default-token-vczkz
+      secret:
+        defaultMode: 420
+        secretName: default-token-vczkz
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T01:34:38Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T09:05:40Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T09:05:40Z"
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T01:34:38Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: docker://2773cdbd88d338242bda8b63e0e1b0ca17c6e4134fde8bba909d3d0a1715b454
+      image: zookeeper:3.5.5
+      imageID: docker-pullable://zookeeper@sha256:4879178a575d76d5720602f81107be4d165107ab03de0b26669605a5d39d656d
+      lastState:
+        terminated:
+          containerID: docker://004a82d48ffc8ad67b8ea6eff3c832eaf7610e83e492d2adbecaadc10d62bc9b
+          exitCode: 143
+          finishedAt: "2019-10-08T09:02:39Z"
+          reason: Error
+          startedAt: "2019-10-08T03:57:22Z"
+      name: zookeeper
+      ready: true
+      restartCount: 1
+      state:
+        running:
+          startedAt: "2019-10-08T09:04:53Z"
+    hostIP: 10.0.2.15
+    phase: Running
+    podIP: 172.17.0.7
+    qosClass: BestEffort
+    startTime: "2019-10-08T01:34:38Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2019-10-08T03:57:50Z"
+    generateName: esb-zookeeper-
+    labels:
+      app: zookeeper
+      component: server
+      controller-revision-hash: esb-zookeeper-cd68659c4
+      release: esb
+      statefulset.kubernetes.io/pod-name: esb-zookeeper-1
+    name: esb-zookeeper-1
+    namespace: esb-nprd
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: StatefulSet
+      name: esb-zookeeper
+      uid: c9a31d2b-a660-4ced-b88c-d09d0fec0aef
+    resourceVersion: "14281"
+    selfLink: /api/v1/namespaces/esb-nprd/pods/esb-zookeeper-1
+    uid: 0396ce63-961f-4802-8e97-52abcbce188c
+  spec:
+    containers:
+    - command:
+      - /bin/bash
+      - -xec
+      - /config-scripts/run
+      env:
+      - name: ZK_REPLICAS
+        value: "3"
+      - name: JMXAUTH
+        value: "false"
+      - name: JMXDISABLE
+        value: "false"
+      - name: JMXPORT
+        value: "1099"
+      - name: JMXSSL
+        value: "false"
+      - name: ZK_HEAP_SIZE
+        value: 1G
+      - name: ZK_SYNC_LIMIT
+        value: "10"
+      - name: ZK_TICK_TIME
+        value: "2000"
+      - name: ZOO_AUTOPURGE_PURGEINTERVAL
+        value: "0"
+      - name: ZOO_AUTOPURGE_SNAPRETAINCOUNT
+        value: "3"
+      - name: ZOO_INIT_LIMIT
+        value: "5"
+      - name: ZOO_MAX_CLIENT_CNXNS
+        value: "60"
+      - name: ZOO_PORT
+        value: "2181"
+      - name: ZOO_STANDALONE_ENABLED
+        value: "false"
+      - name: ZOO_TICK_TIME
+        value: "2000"
+      image: zookeeper:3.5.5
+      imagePullPolicy: IfNotPresent
+      livenessProbe:
+        exec:
+          command:
+          - sh
+          - /config-scripts/ok
+        failureThreshold: 2
+        initialDelaySeconds: 20
+        periodSeconds: 30
+        successThreshold: 1
+        timeoutSeconds: 5
+      name: zookeeper
+      ports:
+      - containerPort: 2181
+        name: client
+        protocol: TCP
+      - containerPort: 3888
+        name: election
+        protocol: TCP
+      - containerPort: 2888
+        name: server
+        protocol: TCP
+      readinessProbe:
+        exec:
+          command:
+          - sh
+          - /config-scripts/ready
+        failureThreshold: 2
+        initialDelaySeconds: 20
+        periodSeconds: 30
+        successThreshold: 1
+        timeoutSeconds: 5
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /data
+        name: data
+      - mountPath: /config-scripts
+        name: config
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-vczkz
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    hostname: esb-zookeeper-1
+    nodeName: minikube
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+    serviceAccount: default
+    serviceAccountName: default
+    subdomain: esb-zookeeper-headless
+    terminationGracePeriodSeconds: 1800
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: data-esb-zookeeper-1
+    - configMap:
+        defaultMode: 365
+        name: esb-zookeeper
+      name: config
+    - name: default-token-vczkz
+      secret:
+        defaultMode: 420
+        secretName: default-token-vczkz
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T03:57:52Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T09:05:20Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T09:05:20Z"
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T03:57:52Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: docker://82570a584aac42474d3f75bef8a832dd69dd19a6acd4e4535ecf06bb70dc2825
+      image: zookeeper:3.5.5
+      imageID: docker-pullable://zookeeper@sha256:4879178a575d76d5720602f81107be4d165107ab03de0b26669605a5d39d656d
+      lastState:
+        terminated:
+          containerID: docker://d53ce76322f6aaf9ac336694f29d6db2b8ac14b14bff8d8418940a1f3dbdbaa6
+          exitCode: 143
+          finishedAt: "2019-10-08T09:02:39Z"
+          reason: Error
+          startedAt: "2019-10-08T03:57:53Z"
+      name: zookeeper
+      ready: true
+      restartCount: 1
+      state:
+        running:
+          startedAt: "2019-10-08T09:04:52Z"
+    hostIP: 10.0.2.15
+    phase: Running
+    podIP: 172.17.0.4
+    qosClass: BestEffort
+    startTime: "2019-10-08T03:57:52Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2019-10-08T03:58:30Z"
+    generateName: esb-zookeeper-
+    labels:
+      app: zookeeper
+      component: server
+      controller-revision-hash: esb-zookeeper-cd68659c4
+      release: esb
+      statefulset.kubernetes.io/pod-name: esb-zookeeper-2
+    name: esb-zookeeper-2
+    namespace: esb-nprd
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: StatefulSet
+      name: esb-zookeeper
+      uid: c9a31d2b-a660-4ced-b88c-d09d0fec0aef
+    resourceVersion: "14342"
+    selfLink: /api/v1/namespaces/esb-nprd/pods/esb-zookeeper-2
+    uid: 3ea1a7a8-8272-44c2-9ee1-e1fb2f8c8c1c
+  spec:
+    containers:
+    - command:
+      - /bin/bash
+      - -xec
+      - /config-scripts/run
+      env:
+      - name: ZK_REPLICAS
+        value: "3"
+      - name: JMXAUTH
+        value: "false"
+      - name: JMXDISABLE
+        value: "false"
+      - name: JMXPORT
+        value: "1099"
+      - name: JMXSSL
+        value: "false"
+      - name: ZK_HEAP_SIZE
+        value: 1G
+      - name: ZK_SYNC_LIMIT
+        value: "10"
+      - name: ZK_TICK_TIME
+        value: "2000"
+      - name: ZOO_AUTOPURGE_PURGEINTERVAL
+        value: "0"
+      - name: ZOO_AUTOPURGE_SNAPRETAINCOUNT
+        value: "3"
+      - name: ZOO_INIT_LIMIT
+        value: "5"
+      - name: ZOO_MAX_CLIENT_CNXNS
+        value: "60"
+      - name: ZOO_PORT
+        value: "2181"
+      - name: ZOO_STANDALONE_ENABLED
+        value: "false"
+      - name: ZOO_TICK_TIME
+        value: "2000"
+      image: zookeeper:3.5.5
+      imagePullPolicy: IfNotPresent
+      livenessProbe:
+        exec:
+          command:
+          - sh
+          - /config-scripts/ok
+        failureThreshold: 2
+        initialDelaySeconds: 20
+        periodSeconds: 30
+        successThreshold: 1
+        timeoutSeconds: 5
+      name: zookeeper
+      ports:
+      - containerPort: 2181
+        name: client
+        protocol: TCP
+      - containerPort: 3888
+        name: election
+        protocol: TCP
+      - containerPort: 2888
+        name: server
+        protocol: TCP
+      readinessProbe:
+        exec:
+          command:
+          - sh
+          - /config-scripts/ready
+        failureThreshold: 2
+        initialDelaySeconds: 20
+        periodSeconds: 30
+        successThreshold: 1
+        timeoutSeconds: 5
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /data
+        name: data
+      - mountPath: /config-scripts
+        name: config
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-vczkz
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    hostname: esb-zookeeper-2
+    nodeName: minikube
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+    serviceAccount: default
+    serviceAccountName: default
+    subdomain: esb-zookeeper-headless
+    terminationGracePeriodSeconds: 1800
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: data-esb-zookeeper-2
+    - configMap:
+        defaultMode: 365
+        name: esb-zookeeper
+      name: config
+    - name: default-token-vczkz
+      secret:
+        defaultMode: 420
+        secretName: default-token-vczkz
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T03:58:32Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T09:05:39Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T09:05:39Z"
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2019-10-08T03:58:32Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: docker://a4b953221833d3b12e1869709c7074d5ca2f8b6328a24b92daf613d2fd79bde8
+      image: zookeeper:3.5.5
+      imageID: docker-pullable://zookeeper@sha256:4879178a575d76d5720602f81107be4d165107ab03de0b26669605a5d39d656d
+      lastState:
+        terminated:
+          containerID: docker://6e6c5fddd9e8099af5a98f14b0353497fcba992cc8794b63094b7bfeb39c3dfd
+          exitCode: 143
+          finishedAt: "2019-10-08T09:02:39Z"
+          reason: Error
+          startedAt: "2019-10-08T03:58:33Z"
+      name: zookeeper
+      ready: true
+      restartCount: 1
+      state:
+        running:
+          startedAt: "2019-10-08T09:04:53Z"
+    hostIP: 10.0.2.15
+    phase: Running
+    podIP: 172.17.0.8
+    qosClass: BestEffort
+    startTime: "2019-10-08T03:58:32Z"
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2019-10-08T01:34:37Z"
+    labels:
+      app.kubernetes.io/component: kafka-broker
+      app.kubernetes.io/instance: esb
+      app.kubernetes.io/managed-by: Tiller
+      app.kubernetes.io/name: kafka
+      helm.sh/chart: kafka-0.20.0
+    name: esb-kafka
+    namespace: esb-nprd
+    resourceVersion: "1365"
+    selfLink: /api/v1/namespaces/esb-nprd/services/esb-kafka
+    uid: 0af643e8-e17f-4ab0-a31c-2a52f5d565dc
+  spec:
+    clusterIP: 10.107.105.46
+    ports:
+    - name: broker
+      port: 9092
+      protocol: TCP
+      targetPort: kafka
+    selector:
+      app.kubernetes.io/component: kafka-broker
+      app.kubernetes.io/instance: esb
+      app.kubernetes.io/name: kafka
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+    creationTimestamp: "2019-10-08T01:34:37Z"
+    labels:
+      app.kubernetes.io/component: kafka-broker
+      app.kubernetes.io/instance: esb
+      app.kubernetes.io/managed-by: Tiller
+      app.kubernetes.io/name: kafka
+      helm.sh/chart: kafka-0.20.0
+    name: esb-kafka-headless
+    namespace: esb-nprd
+    resourceVersion: "1367"
+    selfLink: /api/v1/namespaces/esb-nprd/services/esb-kafka-headless
+    uid: c1c4db81-dbaa-426c-8b51-299032f8e0a4
+  spec:
+    clusterIP: None
+    ports:
+    - name: broker
+      port: 9092
+      protocol: TCP
+      targetPort: 9092
+    selector:
+      app.kubernetes.io/component: kafka-broker
+      app.kubernetes.io/instance: esb
+      app.kubernetes.io/name: kafka
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2019-10-08T01:34:37Z"
+    labels:
+      app: zookeeper
+      chart: zookeeper-2.0.0
+      heritage: Tiller
+      release: esb
+    name: esb-zookeeper
+    namespace: esb-nprd
+    resourceVersion: "1362"
+    selfLink: /api/v1/namespaces/esb-nprd/services/esb-zookeeper
+    uid: 2fd9ae4b-9fb4-441c-a50c-7ca2dc80389b
+  spec:
+    clusterIP: 10.105.83.43
+    ports:
+    - name: client
+      port: 2181
+      protocol: TCP
+      targetPort: client
+    selector:
+      app: zookeeper
+      release: esb
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2019-10-08T01:34:37Z"
+    labels:
+      app: zookeeper
+      chart: zookeeper-2.0.0
+      heritage: Tiller
+      release: esb
+    name: esb-zookeeper-headless
+    namespace: esb-nprd
+    resourceVersion: "1359"
+    selfLink: /api/v1/namespaces/esb-nprd/services/esb-zookeeper-headless
+    uid: 35eb0a29-dbfb-4bb8-9941-45a54dc8f5aa
+  spec:
+    clusterIP: None
+    ports:
+    - name: client
+      port: 2181
+      protocol: TCP
+      targetPort: client
+    - name: election
+      port: 3888
+      protocol: TCP
+      targetPort: election
+    - name: server
+      port: 2888
+      protocol: TCP
+      targetPort: server
+    selector:
+      app: zookeeper
+      release: esb
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2019-10-08T01:34:37Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/component: kafka-broker
+      app.kubernetes.io/instance: esb
+      app.kubernetes.io/managed-by: Tiller
+      app.kubernetes.io/name: kafka
+      helm.sh/chart: kafka-0.20.0
+    name: esb-kafka
+    namespace: esb-nprd
+    resourceVersion: "14461"
+    selfLink: /apis/apps/v1/namespaces/esb-nprd/statefulsets/esb-kafka
+    uid: 2cb30b70-7748-46a6-a7b1-670501c2d3ef
+  spec:
+    podManagementPolicy: OrderedReady
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app.kubernetes.io/component: kafka-broker
+        app.kubernetes.io/instance: esb
+        app.kubernetes.io/name: kafka
+    serviceName: esb-kafka-headless
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app.kubernetes.io/component: kafka-broker
+          app.kubernetes.io/instance: esb
+          app.kubernetes.io/managed-by: Tiller
+          app.kubernetes.io/name: kafka
+          helm.sh/chart: kafka-0.20.0
+      spec:
+        containers:
+        - command:
+          - sh
+          - -exc
+          - |
+            unset KAFKA_PORT && \
+            export KAFKA_BROKER_ID=${POD_NAME##*-} && \
+            export KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${POD_IP}:9092 && \
+            exec /etc/confluent/docker/run
+          env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+          - name: KAFKA_HEAP_OPTS
+            value: -Xmx1G -Xms1G
+          - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+            value: "3"
+          - name: KAFKA_ZOOKEEPER_CONNECT
+            value: esb-zookeeper:2181
+          - name: KAFKA_LOG_DIRS
+            value: /opt/kafka/data/logs
+          - name: KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE
+            value: "false"
+          - name: KAFKA_JMX_PORT
+            value: "5555"
+          image: confluentinc/cp-kafka:5.0.1
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            exec:
+              command:
+              - sh
+              - -ec
+              - /usr/bin/jps | /bin/grep -q SupportedKafka
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: kafka-broker
+          ports:
+          - containerPort: 9092
+            name: kafka
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: kafka
+            timeoutSeconds: 5
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/kafka/data
+            name: datadir
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 60
+    updateStrategy:
+      type: OnDelete
+    volumeClaimTemplates:
+    - metadata:
+        creationTimestamp: null
+        name: datadir
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    collisionCount: 0
+    currentReplicas: 3
+    currentRevision: esb-kafka-65bb6db5bc
+    observedGeneration: 1
+    readyReplicas: 3
+    replicas: 3
+    updateRevision: esb-kafka-65bb6db5bc
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2019-10-08T01:34:37Z"
+    generation: 1
+    labels:
+      app: zookeeper
+      chart: zookeeper-2.0.0
+      component: server
+      heritage: Tiller
+      release: esb
+    name: esb-zookeeper
+    namespace: esb-nprd
+    resourceVersion: "14352"
+    selfLink: /apis/apps/v1/namespaces/esb-nprd/statefulsets/esb-zookeeper
+    uid: c9a31d2b-a660-4ced-b88c-d09d0fec0aef
+  spec:
+    podManagementPolicy: OrderedReady
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: zookeeper
+        component: server
+        release: esb
+    serviceName: esb-zookeeper-headless
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: zookeeper
+          component: server
+          release: esb
+      spec:
+        containers:
+        - command:
+          - /bin/bash
+          - -xec
+          - /config-scripts/run
+          env:
+          - name: ZK_REPLICAS
+            value: "3"
+          - name: JMXAUTH
+            value: "false"
+          - name: JMXDISABLE
+            value: "false"
+          - name: JMXPORT
+            value: "1099"
+          - name: JMXSSL
+            value: "false"
+          - name: ZK_HEAP_SIZE
+            value: 1G
+          - name: ZK_SYNC_LIMIT
+            value: "10"
+          - name: ZK_TICK_TIME
+            value: "2000"
+          - name: ZOO_AUTOPURGE_PURGEINTERVAL
+            value: "0"
+          - name: ZOO_AUTOPURGE_SNAPRETAINCOUNT
+            value: "3"
+          - name: ZOO_INIT_LIMIT
+            value: "5"
+          - name: ZOO_MAX_CLIENT_CNXNS
+            value: "60"
+          - name: ZOO_PORT
+            value: "2181"
+          - name: ZOO_STANDALONE_ENABLED
+            value: "false"
+          - name: ZOO_TICK_TIME
+            value: "2000"
+          image: zookeeper:3.5.5
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            exec:
+              command:
+              - sh
+              - /config-scripts/ok
+            failureThreshold: 2
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: zookeeper
+          ports:
+          - containerPort: 2181
+            name: client
+            protocol: TCP
+          - containerPort: 3888
+            name: election
+            protocol: TCP
+          - containerPort: 2888
+            name: server
+            protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+              - sh
+              - /config-scripts/ready
+            failureThreshold: 2
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /data
+            name: data
+          - mountPath: /config-scripts
+            name: config
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsUser: 1000
+        terminationGracePeriodSeconds: 1800
+        volumes:
+        - configMap:
+            defaultMode: 365
+            name: esb-zookeeper
+          name: config
+    updateStrategy:
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - metadata:
+        creationTimestamp: null
+        name: data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    collisionCount: 0
+    currentReplicas: 3
+    currentRevision: esb-zookeeper-cd68659c4
+    observedGeneration: 1
+    readyReplicas: 3
+    replicas: 3
+    updateRevision: esb-zookeeper-cd68659c4
+    updatedReplicas: 3
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""
